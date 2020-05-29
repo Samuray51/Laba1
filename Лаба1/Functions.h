@@ -11,15 +11,15 @@
 struct memory
 {
 	int **matrix1;
-	int Det1;
+	int Determinant1;
 	int Size;
 	struct memory *next;
 };
 typedef struct memory Memory;
 
-void Add(Memory *head, int **Matr, int m, int d);
-int Prov(int **matr, int **matr1, int m);
-Memory* Proverka(Memory *head, int m, int **matr);
+void MemoryDeterminant(Memory *head, int **Matrix, int size, int determinant);
+int CheckMatrix(int **matrix, int **matrix1_, int size);
+Memory* SearchMatrix(Memory *head, int size, int **matrix);
 
 
 int ROW(FILE *I);
@@ -27,7 +27,7 @@ int COLUMN(FILE *J);
 int SYMBOL(FILE *X);
 int SPACE(FILE *X);
 int LongNumber(FILE *X);
-void PrintMatrix(int **matr, int m);
-void getmatr(int **matri, int kolvo, int i, int j, int **pi);
-int det(int **matrix, int count);
+void PrintMatrix(int **matrix, int m);
+void GetMatrix(int **matrix, int count, int i, int j, int **TemporaryMatrix);
+long long int GetDeterminant(int **matrix, int count);
 #endif

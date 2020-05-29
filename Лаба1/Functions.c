@@ -5,7 +5,7 @@
 struct memory
 {
 	int **matrix1;
-	int Det1;
+	int Determinant1;
 	int Size;
 	struct memory *next;
 };
@@ -14,25 +14,25 @@ typedef struct memory Memory;
 
 
 //Эта функция запоминает матрицы и определитель
-void Add(Memory *head, int **Matr, int m, int d)
+void MemoryDeterminant(Memory *head, int **Matrix, int size, int determinant)
 {
 	int i, j;
 	while (head->next != NULL)
 	{
 		head = head->next;
 	}
-	head->Size = m;
-	head->Det1 = d;
-	head->matrix1 = (int**)malloc(m * sizeof(int*));
-	for (i = 0; i < m; i = i + 1)
+	head->Size = size;
+	head->Determinant1 = determinant;
+	head->matrix1 = (int**)malloc(size * sizeof(int*));
+	for (i = 0; i < size; i = i + 1)
 	{
-		head->matrix1[i] = (int*)malloc(m * sizeof(int));
+		head->matrix1[i] = (int*)malloc(size * sizeof(int));
 	}
-	for (i = 0; i < m; i = i + 1)
+	for (i = 0; i < size; i = i + 1)
 	{
-		for (j = 0; j < m; j = j + 1)
+		for (j = 0; j < size; j = j + 1)
 		{
-			head->matrix1[i][j] = Matr[i][j];
+			head->matrix1[i][j] = Matrix[i][j];
 		}
 	}
 	head->next = (Memory*)malloc(sizeof(Memory));
@@ -43,52 +43,52 @@ void Add(Memory *head, int **Matr, int m, int d)
 
 
 
-
-int Prov(int **matr, int **matr1, int m)
+//Эта функция сравнивает матрицы
+int CheckMatrix(int **matrix, int **matrix1_, int size)
 {
-	int i, j, n = 1;
-	for (i = 0; i < m; i = i + 1)
+	int i, j, temp = 1;
+	for (i = 0; i < size; i = i + 1)
 	{
-		for (j = 0; j < m; j = j + 1)
+		for (j = 0; j < size; j = j + 1)
 		{
-			if (matr[i][j] != matr1[i][j])
+			if (matrix[i][j] != matrix1_[i][j])
 			{
-				n = 0;
+				temp = 0;
 				break;
 			}
 		}
-		if (n == 0)
+		if (temp == 0)
 			break;
 	}
-	return n;
+	return temp;
 }
 
 
 
 //Эти функции проверяют если такие матрицы
-Memory* Proverka(Memory *head, int m, int **matr)
+Memory* SearchMatrix(Memory *head, int size, int **matrix)
 {
-	Memory *n = NULL;
-	int p;
+	Memory *P = NULL;
+	int Temporary;
 	while (head != NULL)
 	{
 		if (head->Size == 0)
 		{
-			n = NULL;
+			P = NULL;
 			break;
 		}
-		if (head->Size == m)
+		if (head->Size == size)
 		{
-			p = Prov(head->matrix1, matr, m);
-			if (p != 0)
+			Temporary = CheckMatrix(head->matrix1, matrix, size);
+			if (Temporary != 0)
 			{
-				n = head;
+				P = head;
 				break;
 			}
 		}
 		head = head->next;
 	}
-	return n;
+	return P;
 }
 
 
@@ -99,14 +99,14 @@ Memory* Proverka(Memory *head, int m, int **matr)
 //Эта функция считает колличество строк
 int ROW(FILE *I)
 {
-	int m = 1;
+	int size = 1;
 	char tmp;
 	while (!feof(I)) {
 		if (fscanf_s(I, "%c", &tmp, 1) == 1)
 		{
 			if (tmp == 10)
 			{
-				m++;
+				size++;
 			}
 		}
 		else
@@ -115,7 +115,7 @@ int ROW(FILE *I)
 		}
 	}
 	fseek(I, 0, SEEK_SET);
-	return m;
+	return size;
 }
 
 
@@ -157,11 +157,11 @@ int COLUMN(FILE *J)
 int SYMBOL(FILE *X)
 {
 	char symbol;
-	int pr = 0;
+	int possition = 0;
 	while (!feof(X))
 	{
 		fscanf_s(X, "%c", &symbol, 1);
-		if ((pr == 32) || (pr == 0) || (pr == 13))
+		if ((possition == 32) || (possition == 0) || (possition == 13))
 		{
 			if (!((symbol == 32) || (symbol == 45) || ((symbol >= 48) && (symbol <= 57))))
 			{
@@ -170,7 +170,7 @@ int SYMBOL(FILE *X)
 				exit(1);
 			}
 		}
-		if ((pr >= 48) && (pr <= 57))
+		if ((possition >= 48) && (possition <= 57))
 		{
 			if (!((symbol == 32) || (symbol == 10) || ((symbol >= 48) && (symbol <= 57))))
 			{
@@ -179,14 +179,14 @@ int SYMBOL(FILE *X)
 				exit(1);
 			}
 		}
-		if (pr == 45) {
+		if (possition == 45) {
 			if (!((symbol >= 48) && (symbol <= 57))) {
 				printf("Некорректные символы или файл пуст\n");
 				system("pause");
 				exit(1);
 			}
 		}
-		pr = symbol;
+		possition = symbol;
 	}
 	fseek(X, 0, SEEK_SET);
 	return 0;
@@ -215,23 +215,23 @@ int SPACE(FILE *X)
 //Эта функция проверяет длину числа
 int LongNumber(FILE *X)
 {
-	char t = 0;
-	int k = 0;
+	char tmp = 0;
+	int count = 0;
 	while (!feof(X))
 	{
-		while ((t != 32) && (!feof(X)) && (t != 10) && (t != 13))
+		while ((tmp != 32) && (!feof(X)) && (tmp != 10) && (tmp != 13))
 		{
-			fscanf_s(X, "%c", &t, 1);
-			k++;
-			if (k > 4)
+			fscanf_s(X, "%c", &tmp, 1);
+			count++;
+			if (count > 4)
 			{
 				printf("Число слишком длинное.\n");
 				system("pause");
 				exit(1);
 			}
 		}
-		k = 0;
-		t = 0;
+		count = 0;
+		tmp = 0;
 	}
 	fseek(X, 0, SEEK_SET);
 	return 0;
@@ -240,14 +240,14 @@ int LongNumber(FILE *X)
 
 
 //Эта функция выводит матрицы
-void PrintMatrix(int **matr, int m)
+void PrintMatrix(int **matrix, int m)
 {
 	int i, j;
 	for (i = 0; i < m; i = i + 1)
 	{
 		for (j = 0; j < m; j = j + 1)
 		{
-			printf("%3d ", matr[i][j]);
+			printf("%3d ", matrix[i][j]);
 		}
 		printf("\n");
 	}
@@ -256,63 +256,63 @@ void PrintMatrix(int **matr, int m)
 
 
 //Эта функция вычеркивания строки и столбца
-void getmatr(int **matri, int kolvo, int i, int j, int **pi)
+void GetMatrix(int **matrix, int count, int i, int j, int **TemporaryMatrix)
 {
 	int ki, kj, di, dj;
 	di = 0;
-	for (ki = 0; ki < kolvo - 1; ki++)
+	for (ki = 0; ki < count - 1; ki++)
 	{
 		if (ki == i)
 		{
 			di = 1;
 		}
 		dj = 0;
-		for (kj = 0; kj < kolvo - 1; kj++)
+		for (kj = 0; kj < count - 1; kj++)
 		{
 			if (kj == j)
 			{
 				dj = 1;
 			}
-			pi[ki][kj] = matri[ki + di][kj + dj];
+			TemporaryMatrix[ki][kj] = matrix[ki + di][kj + dj];
 		}
 	}
 }
 //функция вычисления определителя(матрица,размерность)
-long long int det(int **matrix, int count)
+long long int GetDeterminant(int **matrix, int count)
 {
 	int i, j = 0;
-	long long int temp = 0;
+	long long int determinant = 0;
 	int k = 1;	//степень
 	if (count == 1)
 	{
-		temp = matrix[0][0];
+		determinant = matrix[0][0];
 	}
 	if (count == 2)
 	{
-		temp = matrix[0][0] * matrix[1][1] - matrix[1][0] * matrix[0][1];
+		determinant = matrix[0][0] * matrix[1][1] - matrix[1][0] * matrix[0][1];
 	}
 	if (count > 2)
 	{
-		int **p, n;
-		n = count - 1;
-		p = (int**)malloc(n * sizeof(int*));
-		for (int i1 = 0; i1 < n; i1 = i1 + 1)
+		int **TemporaryMatrix, size;
+		size = count - 1;
+		TemporaryMatrix = (int**)malloc(size * sizeof(int*));
+		for (int i1 = 0; i1 < size; i1 = i1 + 1)
 		{
-			p[i1] = (int*)malloc(n * sizeof(int));
+			TemporaryMatrix[i1] = (int*)malloc(size * sizeof(int));
 		}
 		for (i = 0; i < count; i++)
 		{
-			getmatr(matrix, count, i, j, p);
+			GetMatrix(matrix, count, i, j, TemporaryMatrix);
 			//printf("%d\n", matrix[i][j]);
 			//PrintMatrix(p, count-1);
-			temp = temp + k * matrix[i][0] * det(p, count - 1);
+			determinant = determinant + k * matrix[i][0] * GetDeterminant(TemporaryMatrix, count - 1);
 			k = -k;
 		}
-		for (int i1 = 0; i1 < n; i1 = i1 + 1)
+		for (int i1 = 0; i1 < size; i1 = i1 + 1)
 		{
-			free(p[i1]);
+			free(TemporaryMatrix[i1]);
 		}
-		free(p);
+		free(TemporaryMatrix);
 	}
-	return temp;
+	return determinant;
 }
